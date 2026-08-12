@@ -120,8 +120,8 @@ def my_asset(
 
 **Declarative Automation:**
 ```python
-automation_condition=dg.AutomationCondition.eager()  # Run as soon as deps are ready
-automation_condition=dg.AutomationCondition.on_cron("0 0 * * *")  # Daily at midnight
+automation_condition = dg.AutomationCondition.eager()  # Run as soon as deps are ready
+automation_condition = dg.AutomationCondition.on_cron("0 0 * * *")  # Daily at midnight
 ```
 
 **Global Freshness Policy:**
@@ -138,11 +138,12 @@ global_freshness_policy = InternalFreshnessPolicy.time_window(fail_window=timede
 
 **Asset Check Patterns:**
 ```python
-check_specs=[
+check_specs = [
     dg.AssetCheckSpec("non_empty_check", asset=asset_key),
     dg.AssetCheckSpec("freshness_check", asset=asset_key),
     dg.AssetCheckSpec("schema_validation", asset=asset_key),
 ]
+
 
 # Check implementation
 @dg.asset_check(asset=asset_key, name="non_empty_check")
@@ -174,6 +175,7 @@ return dg.MaterializeResult(
 from dagster import DailyPartitionsDefinition
 
 daily_partition = DailyPartitionsDefinition(start_date="2024-01-01")
+
 
 # Access in asset
 def my_asset(context: dg.AssetExecutionContext):
@@ -243,6 +245,7 @@ def my_asset(context: dg.AssetExecutionContext):
 1. **Define component class** in `lib/<integration>/component.py`:
    ```python
    from dagster.components import Component, component
+
 
    @component(name="my_component")
    class MyComponent(Component):
@@ -352,6 +355,7 @@ Organize related assets:
 ```python
 @dg.asset(group_name="oss_analytics")
 def pypi_downloads(): ...
+
 
 @dg.asset(group_name="oss_analytics")
 def github_metrics(): ...
