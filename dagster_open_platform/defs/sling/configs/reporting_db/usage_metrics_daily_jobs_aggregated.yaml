@@ -20,7 +20,9 @@ streams:
         RUNS,
         STEPS_CREDITS,
         STANDARD_CREDITS,
-        HIGH_VELOCITY_CREDITS
+        HIGH_VELOCITY_CREDITS,
+        CPU_MINUTES,
+        GIB_MINUTES
       FROM purina.product.usage_metrics_daily_jobs_aggregated
     meta:
       dagster:
