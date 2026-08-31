@@ -14,6 +14,7 @@ attributes:
     - "appellant_unseated"
     - "supplement_crystallization"
     - "sergeant_washbasin"
+    - "assertion_overstay"  # greenhouse
   connector_schedules:
     unfamiliar_eye: "0 * * * *"  # salesforce
     museum_odious: "0 * * * *"  # hubspot
