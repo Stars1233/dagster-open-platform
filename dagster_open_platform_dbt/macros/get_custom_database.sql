@@ -5,7 +5,9 @@
             {{ default_database }}
         {% elif target.name == 'branch_deployment' %}
             {% set prefix = node.fqn[1] %}
-            {{ return([prefix | trim, 'clone', env_var('DAGSTER_CLOUD_PULL_REQUEST_ID')]|join('_')) }}
+            {# Defaulted like profiles.yml: set whenever a branch deployment
+               actually runs, but not during the `dbt parse` at deploy time. #}
+            {{ return([prefix | trim, 'clone', env_var('DAGSTER_CLOUD_PULL_REQUEST_ID', '')]|join('_')) }}
         {% elif target.name == 'purina_ci' %}
             {% set prefix = node.fqn[1] %}
             {{ return([prefix | trim, 'ci']|join('_')) }}
