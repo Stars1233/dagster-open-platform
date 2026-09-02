@@ -1,4 +1,3 @@
-import datetime
 import json
 from collections.abc import Mapping, Sequence
 from datetime import timedelta
@@ -241,8 +240,4 @@ def defs():
             dbt_partitioned_models,
             dbt_non_partitioned_models,
         ],
-        asset_checks=dg.build_last_update_freshness_checks(
-            assets=[dbt_snapshot_models],
-            lower_bound_delta=datetime.timedelta(hours=36),
-        ),
     )

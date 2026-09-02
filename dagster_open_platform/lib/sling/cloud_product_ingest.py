@@ -1,5 +1,6 @@
 from collections.abc import Iterable, Mapping, Sequence
 from datetime import timedelta
+from functools import partial
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -9,8 +10,8 @@ from dagster import (
     AutoMaterializePolicy,
     AutomationCondition,
     Definitions,
-    build_last_update_freshness_checks,
-    build_sensor_for_freshness_checks,
+    FreshnessPolicy,
+    apply_freshness_policy,
 )
 from dagster.components import Component, ComponentLoadContext, Model, Resolvable, Resolver
 from dagster_open_platform.lib.sling.utils import _resolve_path, build_sling_assets
@@ -68,7 +69,7 @@ class DopReplicationSpec(Resolvable, Model):
     name: str
     shards: Sequence[str]
     cron_schedule: str = "*/5 * * * *"
-    last_update_freshness_check: Mapping[str, int] | None = None
+    freshness_fail_window: Mapping[str, int] | None = None
     asset_key_prefix: str | None = None
 
 
@@ -79,7 +80,8 @@ class ProdDbReplicationsComponent(Component, Resolvable, Model):
     * expect `shard_foo.yaml` to exist in the config_dir
     * use those to build @sling_assets named `cloud_product_shard_foo` (when shard name is "main" it is omitted)
     * by default schedule it to run every 5 minutes, but can be overridden with cron_schedule
-    * optionally create a last update freshness check with provided timedelta arguments if set
+    * optionally attach a time-window freshness policy, whose fail window is built from the
+      provided timedelta arguments
     """
 
     config_dir: Annotated[Path, Resolver(_resolve_path, model_field_type=str)]
@@ -90,7 +92,6 @@ class ProdDbReplicationsComponent(Component, Resolvable, Model):
 
     def build_defs(self, context: ComponentLoadContext):
         assets = []
-        checks = []
         for replication in self.replications:
             for shard in replication.shards:
                 name = (
@@ -115,21 +116,14 @@ class ProdDbReplicationsComponent(Component, Resolvable, Model):
                     ),
                 )
 
+                if replication.freshness_fail_window:
+                    policy = FreshnessPolicy.time_window(
+                        fail_window=timedelta(**replication.freshness_fail_window)
+                    )
+                    main_assets = main_assets.map_asset_specs(
+                        partial(apply_freshness_policy, policy=policy)
+                    )
+
                 assets.append(main_assets)
                 assets.extend(deps)
-
-                if replication.last_update_freshness_check:
-                    main_checks = build_last_update_freshness_checks(
-                        assets=[main_assets],
-                        lower_bound_delta=timedelta(**replication.last_update_freshness_check),
-                    )
-                    checks.extend(main_checks)
-        return Definitions(
-            assets=assets,
-            asset_checks=checks,
-            sensors=[
-                build_sensor_for_freshness_checks(freshness_checks=checks),
-            ]
-            if checks
-            else [],
-        )
+        return Definitions(assets=assets)

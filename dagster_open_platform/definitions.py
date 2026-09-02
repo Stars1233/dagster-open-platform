@@ -23,7 +23,9 @@ def defs() -> dg.Definitions:
     defs = dg.components.load_defs(dagster_open_platform.defs)
 
     defs = defs.permissive_map_resolved_asset_specs(
-        func=lambda spec: apply_freshness_policy(spec, global_freshness_policy),
+        func=lambda spec: apply_freshness_policy(
+            spec, global_freshness_policy, overwrite_existing=False
+        ),
         selection=AssetSelection.all().materializable(),
     )
 

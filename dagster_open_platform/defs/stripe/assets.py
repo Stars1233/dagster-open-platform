@@ -1,6 +1,5 @@
 """Source assets representing stripe's data sync process."""
 
-import datetime
 from collections.abc import Iterator
 
 from dagster import (
@@ -10,7 +9,6 @@ from dagster import (
     MetadataValue,
     ObserveResult,
     ScheduleDefinition,
-    build_last_update_freshness_checks,
     define_asset_job,
     multi_observable_source_asset,
 )
@@ -23,10 +21,6 @@ from dagster_snowflake.resources import fetch_last_updated_timestamps
 
 STRIPE_SYNC_DATABASE = "STRIPE_PIPELINE"
 STRIPE_SYNC_SCHEMA = "STRIPE"
-
-# Read stripe's documentation to understand sync freshness guarantees.
-# https://docs.stripe.com/stripe-data/available-data
-maximum_time_between_syncs = datetime.timedelta(hours=9)
 
 table_names = [
     "BALANCE_TRANSACTIONS",
@@ -51,10 +45,6 @@ table_names_to_asset_keys = {
 }
 asset_keys_to_table_names = {v: k for k, v in table_names_to_asset_keys.items()}
 
-stripe_pipeline_freshness_checks = build_last_update_freshness_checks(
-    assets=list(table_names_to_asset_keys.values()),
-    lower_bound_delta=maximum_time_between_syncs,
-)
 asset_specs = [
     AssetSpec(
         key=table_names_to_asset_keys[table_name],

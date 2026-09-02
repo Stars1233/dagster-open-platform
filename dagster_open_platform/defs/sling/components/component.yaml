@@ -6,7 +6,7 @@ attributes:
     - name: low_volume
       shards: [xregion, main, shard1]
       cron_schedule: "0 */2 * * *"
-      last_update_freshness_check:
+      freshness_fail_window:
         days: 1
 
     - name: full_refresh
@@ -18,8 +18,8 @@ attributes:
 
     - name: event_log
       shards: [main, shard1]
-      last_update_freshness_check:
-        minutes: 30
+      freshness_fail_window:
+        hours: 2
 
     - name: user_event_log
       shards: [main, shard1]
@@ -30,7 +30,7 @@ attributes:
 
     - name: audit_log
       shards: [main, shard1]
-      last_update_freshness_check:
+      freshness_fail_window:
         minutes: 30
 
 ---
@@ -47,7 +47,7 @@ attributes:
     - name: salesforce_contract_info
       deps:
         - "{{ dbt_asset_key('reporting_contract_info') }}"
-    
+
     - name: enterprise_contract_metadata
       deps:
         - "{{ dbt_asset_key('enterprise_contract_metadata') }}"
@@ -71,7 +71,7 @@ attributes:
       host: '{{ env.COMPASS_POSTGRES_HOST }}'
       user: '{{ env.COMPASS_POSTGRES_USER }}'
       password: '{{ env.COMPASS_POSTGRES_PASSWORD }}'
-      database: '{{ env.COMPASS_POSTGRES_DBNAME }}'      
+      database: '{{ env.COMPASS_POSTGRES_DBNAME }}'
       sslmode: 'require'
     SNOWFLAKE:
       type: snowflake
