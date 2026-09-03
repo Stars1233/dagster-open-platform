@@ -31,7 +31,7 @@ attributes:
     - name: audit_log
       shards: [main, shard1]
       freshness_fail_window:
-        minutes: 30
+        minutes: 35
 
 ---
 
